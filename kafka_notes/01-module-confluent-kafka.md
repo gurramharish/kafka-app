@@ -1,4 +1,4 @@
-# Module 1 – Kafka Fundamentals with Confluent Platform (cp-all-in-one)
+    # Module 1 – Kafka Fundamentals with Confluent Platform (cp-all-in-one)
 
 > Goal: Understand Kafka core concepts (brokers, topics, partitions, replication, producers, consumers, consumer groups, offsets, KRaft) **and** get a full Confluent Platform running locally with hands‑on exercises.
 
