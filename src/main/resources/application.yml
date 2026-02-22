@@ -1,0 +1,151 @@
+spring:
+  application:
+    name: kafka-order-app
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    
+    # Producer Configuration
+    producer:
+      # Serializers
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      
+      # Reliability
+      acks: all  # Wait for all in-sync replicas
+      retries: 3
+      retry-backoff-ms: 1000
+      enable.idempotence: true  # Exactly-once semantics
+      
+      # Performance Settings (Profile-based)
+      # These will be overridden by profile-specific configurations
+      batch-size: 16384
+      linger-ms: 5
+      buffer-memory: 33554432  # 32MB
+      compression-type: lz4
+      
+      # Custom properties for consistent hashing
+      properties:
+        enable.idempotence: true
+        partitioner.class: com.example.kafka.producer.ConsistentHashPartitioner
+    
+    # Consumer Configuration
+    consumer:
+      # Deserializers
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      
+      # Group management
+      group-id: order-consumer-group
+      auto-offset-reset: earliest
+      
+      # Offset management
+      enable-auto-commit: false
+      
+      # Performance
+      max-poll-records: 100
+      fetch-min-bytes: 1024
+      fetch-max-wait-ms: 500
+      
+      # Session and heartbeat
+      heartbeat-interval-ms: 3000
+      session-timeout-ms: 30000
+      max-poll-interval-ms: 300000
+      
+      # Partition assignment strategy
+      properties:
+        partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+        # Trust packages for JSON deserialization
+        spring.json.trusted.packages: com.example.kafka.model
+    
+    # Listener Configuration
+    listener:
+      # Manual acknowledgment for production
+      ack-mode: manual
+      
+      # Concurrency
+      concurrency: 3
+      
+      # Error handling
+      missing-topics-fatal: false
+      
+      # Poll timeout
+      poll-timeout: 3000
+
+# Profile-specific Performance Configuration
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  kafka:
+    producer:
+      batch-size: 65536        # 64KB batches
+      linger-ms: 20              # 20ms wait
+      buffer-memory: 67108864   # 64MB buffer
+      compression-type: lz4
+      max-in-flight-requests-per-connection: 5
+      delivery-timeout-ms: 120000   # 2 minutes
+
+app:
+  producer:
+    performance:
+      profile: high-throughput
+
+---
+# Development Profile  
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  kafka:
+    producer:
+      batch-size: 8192         # 8KB batches
+      linger-ms: 2               # 2ms wait
+      buffer-memory: 16777216   # 16MB buffer
+      compression-type: none        # No compression for debugging
+      delivery-timeout-ms: 30000    # 30 seconds
+
+app:
+  producer:
+    performance:
+      profile: balanced
+
+---
+# Local Profile
+spring:
+  config:
+    activate:
+      on-profile: "local"
+  kafka:
+    producer:
+      batch-size: 4096         # 4KB batches
+      linger-ms: 0               # No waiting
+      buffer-memory: 8388608    # 8MB buffer
+      compression-type: none        # No compression
+      max-in-flight-requests-per-connection: 1
+      delivery-timeout-ms: 5000     # 5 seconds
+
+# Application Configuration
+app:
+  kafka:
+    topics:
+      orders: just-pay-orders
+  producer:
+    performance:
+      profile: ${APP_PRODUCER_PERFORMANCE_PROFILE:balanced}
+
+# API Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  timeout: 5000
+
+# Logging Configuration
+logging:
+  level:
+    com.example.kafka: DEBUG
+    org.springframework.kafka: INFO
+    org.apache.kafka: WARN
