@@ -1,6 +1,8 @@
 package com.example.kafka.consumer;
 
 import com.example.kafka.model.Order;
+import com.example.kafka.service.OrderConsumedService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -11,7 +13,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OrderConsumerService {
+    
+    private final OrderConsumedService orderConsumedService;
     
     /**
      * Listen to orders topic with manual acknowledgment
@@ -42,8 +47,14 @@ public class OrderConsumerService {
                     order.amount(), 
                     order.status());
             
+            // Save to consumed table immediately
+            orderConsumedService.saveConsumedOrder(order, partition, offset);
+            
             // Process the order
             processOrder(order);
+            
+            // Mark as successfully processed
+            orderConsumedService.markOrderAsSuccess(order.orderId());
             
             log.info("Successfully processed order: {}", order.orderId());
             
@@ -54,6 +65,9 @@ public class OrderConsumerService {
             
         } catch (Exception ex) {
             log.error("Failed to process order: {}, error: {}", order.orderId(), ex.getMessage(), ex);
+            
+            // Mark as failed in database
+            orderConsumedService.markOrderAsFailed(order.orderId(), ex.getMessage());
             
             // Don't acknowledge - message will be reprocessed
             log.warn("Message not acknowledged, will be reprocessed");
