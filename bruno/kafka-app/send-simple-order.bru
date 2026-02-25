@@ -1,0 +1,19 @@
+meta {
+  name: Send Simple Order
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/orders/simple
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "orderId": "ORD-002",
+    "customerId": "CUST-002",
+    "amount": 149.99
+  }
+}

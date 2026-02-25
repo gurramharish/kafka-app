@@ -1,0 +1,11 @@
+meta {
+  name: Generate Random Orders
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/orders/generate?count=100
+  body: none
+  auth: none
+}

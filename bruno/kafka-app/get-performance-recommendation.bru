@@ -1,0 +1,11 @@
+meta {
+  name: Get Performance Recommendations
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/performance/recommendation?messageSize=1024&messageRate=5000&latencyCritical=false
+  body: none
+  auth: none
+}

@@ -44,7 +44,9 @@ APP_PRODUCER_PERFORMANCE_PROFILE=high-throughput mvn spring-boot:run
 
 ## API Endpoints
 
-### Send Full Order
+### Order Management
+
+#### Send Full Order
 ```bash
 curl -X POST http://localhost:8080/api/orders \
   -H "Content-Type: application/json" \
@@ -59,7 +61,7 @@ curl -X POST http://localhost:8080/api/orders \
   }'
 ```
 
-### Send Simple Order
+#### Send Simple Order
 ```bash
 curl -X POST http://localhost:8080/api/orders/simple \
   -H "Content-Type: application/json" \
@@ -68,6 +70,177 @@ curl -X POST http://localhost:8080/api/orders/simple \
     "customerId": "CUST-002",
     "amount": 149.99
   }'
+```
+
+#### Generate Random Orders
+```bash
+# Generate 100 random orders (default)
+curl -X POST http://localhost:8080/api/orders/generate
+
+# Generate 500 random orders
+curl -X POST "http://localhost:8080/api/orders/generate?count=500"
+
+# Generate orders asynchronously (for large batches)
+curl -X POST "http://localhost:8080/api/orders/generate-async?count=1000"
+```
+
+#### Get Order Statistics
+```bash
+curl -X GET http://localhost:8080/api/orders/stats
+```
+
+### Batch Processing
+
+#### Publish All Pending Orders
+```bash
+curl -X POST http://localhost:8080/api/batch/publish
+```
+
+#### Get Batch Processing Progress
+```bash
+curl -X GET http://localhost:8080/api/batch/progress
+```
+
+#### Get Batch Statistics
+```bash
+curl -X GET http://localhost:8080/api/batch/stats
+```
+
+#### Get Batch Status
+```bash
+curl -X GET http://localhost:8080/api/batch/status
+```
+
+### Monitoring
+
+#### Get Comprehensive Monitoring Stats
+```bash
+curl -X GET http://localhost:8080/api/monitoring/stats
+```
+
+#### Get Batch Processing Stats
+```bash
+curl -X GET http://localhost:8080/api/monitoring/batch-stats
+```
+
+#### Get Consumption Stats
+```bash
+curl -X GET http://localhost:8080/api/monitoring/consumption-stats
+```
+
+### Performance Management
+
+#### Get Current Performance Profile
+```bash
+curl -X GET http://localhost:8080/api/performance/profile
+```
+
+#### Get Performance Recommendations
+```bash
+curl -X GET "http://localhost:8080/api/performance/recommendation?messageSize=1024&messageRate=5000&latencyCritical=false"
+```
+
+#### Get All Available Profiles
+```bash
+curl -X GET http://localhost:8080/api/performance/profiles
+```
+
+#### Switch Performance Profile
+```bash
+curl -X POST http://localhost:8080/api/performance/profile/switch \
+  -H "Content-Type: application/json" \
+  -d '{"profile": "high-throughput"}'
+```
+
+## API Response Examples
+
+### Order Response
+```json
+{
+  "orderId": "ORD-001",
+  "status": "SENT",
+  "partition": 2,
+  "offset": 15,
+  "timestamp": 1708503045123,
+  "message": "Order sent successfully"
+}
+```
+
+### Generation Response
+```json
+{
+  "requested": 100,
+  "generated": 100,
+  "message": "Successfully generated orders"
+}
+```
+
+### Order Statistics
+```json
+{
+  "total": 1500,
+  "pending": 250
+}
+```
+
+### Batch Processing Result
+```json
+{
+  "totalProcessed": 250,
+  "successful": 245,
+  "failed": 5,
+  "message": "Batch processing completed"
+}
+```
+
+### Batch Progress
+```json
+{
+  "isProcessing": true,
+  "activeBatches": 3,
+  "remainingOrders": 150,
+  "batchSize": 50,
+  "status": "Processing batches..."
+}
+```
+
+### Monitoring Statistics
+```json
+{
+  "batchStats": {
+    "activeBatches": 2,
+    "pendingOrders": 100,
+    "batchSize": 50,
+    "totalProcessed": 500,
+    "successful": 495,
+    "failed": 5
+  },
+  "consumptionStats": {
+    "totalConsumed": 495,
+    "successful": 490,
+    "failed": 5,
+    "lastConsumedTimestamp": 1708503045123
+  }
+}
+```
+
+### Performance Profile
+```json
+{
+  "activeProfile": "balanced",
+  "timestamp": 1708503045123
+}
+```
+
+### Performance Recommendation
+```json
+{
+  "messageSize": 1024,
+  "messageRate": 5000,
+  "latencyCritical": false,
+  "recommendedProfile": "balanced",
+  "explanation": "Balanced profile recommended for general use with 5000 messages/sec and 1024 byte messages. Good compromise between throughput and latency."
+}
 ```
 
 ## Key Features

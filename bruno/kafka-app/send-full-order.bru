@@ -1,0 +1,23 @@
+meta {
+  name: Send Full Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "orderId": "ORD-001",
+    "customerId": "CUST-001",
+    "amount": 99.99,
+    "currency": "USD",
+    "status": "PENDING",
+    "paymentMethod": "CREDIT_CARD",
+    "description": "Test order"
+  }
+}

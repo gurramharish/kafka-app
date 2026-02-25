@@ -1,0 +1,17 @@
+meta {
+  name: Switch Performance Profile
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/performance/profile/switch
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "profile": "high-throughput"
+  }
+}

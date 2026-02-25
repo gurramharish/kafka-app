@@ -1,0 +1,11 @@
+meta {
+  name: Generate Orders Async
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/orders/generate-async?count=1000
+  body: none
+  auth: none
+}
